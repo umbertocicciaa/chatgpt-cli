@@ -442,7 +442,17 @@ func configGetCommand(config *Config, args []string) error {
 
 	switch key {
 	case "OPENAI_API_KEY":
-		fmt.Println(config.APIKey)
+		apiKey := config.APIKey
+		if apiKey != "" {
+			if len(apiKey) > 8 {
+				apiKey = apiKey[:4] + "..." + apiKey[len(apiKey)-4:]
+			} else {
+				apiKey = "***"
+			}
+		} else {
+			apiKey = "(not set)"
+		}
+		fmt.Println(apiKey)
 	case "OPENAI_API_URL":
 		fmt.Println(config.APIURL)
 	case "OPENAI_MODEL":
