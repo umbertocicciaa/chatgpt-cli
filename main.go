@@ -627,8 +627,12 @@ func logEntry(config *Config, command, prompt, response, errorMsg string) {
 	}
 	defer f.Close()
 
-	f.Write(data)
-	f.WriteString("\n")
+	if _, err := f.Write(data); err != nil {
+		return // Silent failure
+	}
+	if _, err := f.WriteString("\n"); err != nil {
+		return // Silent failure
+	}
 }
 
 // truncate truncates a string to a maximum length
@@ -690,7 +694,7 @@ func main() {
 	command, exists := commands[commandName]
 	if !exists {
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n\n", commandName)
-		helpCommand(config, []string{})
+		_ = helpCommand(config, []string{})
 		os.Exit(1)
 	}
 

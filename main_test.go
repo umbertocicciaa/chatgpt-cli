@@ -405,8 +405,12 @@ func TestLogsCommand(t *testing.T) {
 	}
 
 	enc := json.NewEncoder(f)
-	enc.Encode(entry1)
-	enc.Encode(entry2)
+	if err := enc.Encode(entry1); err != nil {
+		t.Fatalf("failed to encode entry1: %v", err)
+	}
+	if err := enc.Encode(entry2); err != nil {
+		t.Fatalf("failed to encode entry2: %v", err)
+	}
 	f.Close()
 
 	// Test with logs
@@ -888,7 +892,7 @@ func TestPromptCommandSuccess(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
+		_ = json.NewEncoder(w).Encode(response)
 	}))
 	defer server.Close()
 
@@ -1153,7 +1157,7 @@ func TestSendChatRequest(t *testing.T) {
 				}
 
 				w.WriteHeader(http.StatusOK)
-				json.NewEncoder(w).Encode(response)
+				_ = json.NewEncoder(w).Encode(response)
 			}),
 			wantErr: false,
 		},
@@ -1168,7 +1172,7 @@ func TestSendChatRequest(t *testing.T) {
 				}
 
 				w.WriteHeader(http.StatusOK)
-				json.NewEncoder(w).Encode(response)
+				_ = json.NewEncoder(w).Encode(response)
 			}),
 			wantErr:     true,
 			errContains: "API error",
