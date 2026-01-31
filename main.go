@@ -102,24 +102,111 @@ type Command struct {
 	Handler     func(*Config, []string) error
 }
 
-// loadConfig loads configuration from environment variables with defaults
+// loadConfig loads configuration from config file and environment variables with defaults
 func loadConfig() (*Config, error) {
-	config := &Config{
-		APIKey:      os.Getenv(envAPIKey),
-		APIURL:      getEnvOrDefault(envAPIURL, defaultAPIURL),
-		Model:       getEnvOrDefault(envModel, defaultModel),
-		Timeout:     parseDurationOrDefault(os.Getenv(envTimeout), defaultTimeout),
-		MaxTokens:   parseIntOrDefault(os.Getenv(envMaxTokens), defaultMaxTokens),
-		Temperature: parseFloatOrDefault(os.Getenv(envTemperature), defaultTemperature),
-		ConfigDir:   getConfigDir(),
-	}
+	configDir := getConfigDir()
 
 	// Ensure config directory exists
-	if err := os.MkdirAll(config.ConfigDir, 0755); err != nil {
+	if err := os.MkdirAll(configDir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create config directory: %w", err)
 	}
 
+	// Load from config file first
+	fileConfig := loadConfigFile(configDir)
+
+	// Environment variables override file config
+	config := &Config{
+		APIKey:      getEnvOrFileConfig(envAPIKey, fileConfig["OPENAI_API_KEY"]),
+		APIURL:      getEnvOrFileOrDefault(envAPIURL, fileConfig["OPENAI_API_URL"], defaultAPIURL),
+		Model:       getEnvOrFileOrDefault(envModel, fileConfig["OPENAI_MODEL"], defaultModel),
+		Timeout:     parseDurationOrDefault(getEnvOrFileConfig(envTimeout, fileConfig["OPENAI_TIMEOUT"]), defaultTimeout),
+		MaxTokens:   parseIntOrDefault(getEnvOrFileConfig(envMaxTokens, fileConfig["OPENAI_MAX_TOKENS"]), defaultMaxTokens),
+		Temperature: parseFloatOrDefault(getEnvOrFileConfig(envTemperature, fileConfig["OPENAI_TEMPERATURE"]), defaultTemperature),
+		ConfigDir:   configDir,
+	}
+
 	return config, nil
+}
+
+// loadConfigFile loads configuration from file
+func loadConfigFile(configDir string) map[string]string {
+	configFile := filepath.Join(configDir, "config")
+	config := make(map[string]string)
+
+	data, err := os.ReadFile(configFile)
+	if err != nil {
+		return config // File doesn't exist or can't be read, return empty config
+	}
+
+	lines := strings.Split(string(data), "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) == 2 {
+			config[strings.TrimSpace(parts[0])] = strings.TrimSpace(parts[1])
+		}
+	}
+
+	return config
+}
+
+// saveConfigFile saves configuration to file
+func saveConfigFile(configDir string, config map[string]string) error {
+	configFile := filepath.Join(configDir, "config")
+
+	// Read existing config to preserve all values
+	existingConfig := loadConfigFile(configDir)
+
+	// Merge with new values
+	for key, value := range config {
+		existingConfig[key] = value
+	}
+
+	// Write config file
+	var lines []string
+	lines = append(lines, "# ChatGPT CLI Configuration")
+	lines = append(lines, "# Generated on "+time.Now().Format("2006-01-02 15:04:05"))
+	lines = append(lines, "")
+
+	keys := []string{
+		"OPENAI_API_KEY",
+		"OPENAI_API_URL",
+		"OPENAI_MODEL",
+		"OPENAI_TIMEOUT",
+		"OPENAI_MAX_TOKENS",
+		"OPENAI_TEMPERATURE",
+	}
+
+	for _, key := range keys {
+		if value, exists := existingConfig[key]; exists && value != "" {
+			lines = append(lines, fmt.Sprintf("%s=%s", key, value))
+		}
+	}
+
+	return os.WriteFile(configFile, []byte(strings.Join(lines, "\n")+"\n"), 0600)
+}
+
+// getEnvOrFileConfig gets value from env var first, then file config
+func getEnvOrFileConfig(envKey, fileValue string) string {
+	if envValue := os.Getenv(envKey); envValue != "" {
+		return envValue
+	}
+	return fileValue
+}
+
+// getEnvOrFileOrDefault gets value from env var, then file config, then default
+func getEnvOrFileOrDefault(envKey, fileValue, defaultValue string) string {
+	if envValue := os.Getenv(envKey); envValue != "" {
+		return envValue
+	}
+	if fileValue != "" {
+		return fileValue
+	}
+	return defaultValue
 }
 
 // getConfigDir returns the configuration directory path
@@ -384,64 +471,54 @@ func configSetCommand(config *Config, args []string) error {
 	key := strings.ToUpper(args[0])
 	value := args[1]
 
-	// Validate and set the value
+	// Validate the value
 	switch key {
 	case "OPENAI_API_KEY":
 		if value == "" {
 			return fmt.Errorf("API key cannot be empty")
 		}
-		os.Setenv(envAPIKey, value)
-		fmt.Printf("Set %s (session only - not persisted)\n", key)
-		fmt.Println("To persist, add to your shell profile: export OPENAI_API_KEY='...'")
 
 	case "OPENAI_API_URL":
 		if !strings.HasPrefix(value, "http://") && !strings.HasPrefix(value, "https://") {
 			return fmt.Errorf("API URL must start with http:// or https://")
 		}
-		os.Setenv(envAPIURL, value)
-		fmt.Printf("Set %s=%s (session only)\n", key, value)
 
 	case "OPENAI_MODEL":
 		if value == "" {
 			return fmt.Errorf("model cannot be empty")
 		}
-		os.Setenv(envModel, value)
-		fmt.Printf("Set %s=%s (session only)\n", key, value)
 
 	case "OPENAI_TIMEOUT":
 		if _, err := time.ParseDuration(value); err != nil {
 			return fmt.Errorf("invalid timeout format (use format like '60s', '1m', '90s'): %w", err)
 		}
-		os.Setenv(envTimeout, value)
-		fmt.Printf("Set %s=%s (session only)\n", key, value)
 
 	case "OPENAI_MAX_TOKENS":
 		tokens, err := strconv.Atoi(value)
 		if err != nil || tokens <= 0 {
 			return fmt.Errorf("max tokens must be a positive integer")
 		}
-		os.Setenv(envMaxTokens, value)
-		fmt.Printf("Set %s=%s (session only)\n", key, value)
 
 	case "OPENAI_TEMPERATURE":
 		temp, err := strconv.ParseFloat(value, 64)
 		if err != nil || temp < 0 || temp > 2 {
 			return fmt.Errorf("temperature must be a number between 0.0 and 2.0")
 		}
-		os.Setenv(envTemperature, value)
-		fmt.Printf("Set %s=%s (session only)\n", key, value)
 
 	case "CHATGPT_CLI_CONFIG_DIR":
-		if value == "" {
-			return fmt.Errorf("config directory cannot be empty")
-		}
-		os.Setenv(envConfigDir, value)
-		fmt.Printf("Set %s=%s (session only)\n", key, value)
+		return fmt.Errorf("CHATGPT_CLI_CONFIG_DIR cannot be set via config set command. Use the environment variable instead.")
 
 	default:
-		return fmt.Errorf("unknown configuration key: %s\nValid keys: OPENAI_API_KEY, OPENAI_API_URL, OPENAI_MODEL, OPENAI_TIMEOUT, OPENAI_MAX_TOKENS, OPENAI_TEMPERATURE, CHATGPT_CLI_CONFIG_DIR", key)
+		return fmt.Errorf("unknown configuration key: %s\nValid keys: OPENAI_API_KEY, OPENAI_API_URL, OPENAI_MODEL, OPENAI_TIMEOUT, OPENAI_MAX_TOKENS, OPENAI_TEMPERATURE", key)
 	}
 
+	// Save to config file
+	if err := saveConfigFile(config.ConfigDir, map[string]string{key: value}); err != nil {
+		return fmt.Errorf("failed to save configuration: %w", err)
+	}
+
+	fmt.Printf("Set %s=%s\n", key, value)
+	fmt.Printf("Configuration saved to %s\n", filepath.Join(config.ConfigDir, "config"))
 	return nil
 }
 

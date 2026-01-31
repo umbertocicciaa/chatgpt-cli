@@ -1088,15 +1088,16 @@ func TestConfigSetCommandExtended(t *testing.T) {
 			errContains: "between 0.0 and 2.0",
 		},
 		{
-			name:    "set valid config dir",
-			args:    []string{"CHATGPT_CLI_CONFIG_DIR", "/tmp/test-config"},
-			wantErr: false,
+			name:        "set valid config dir",
+			args:        []string{"CHATGPT_CLI_CONFIG_DIR", "/tmp/test-config"},
+			wantErr:     true,
+			errContains: "cannot be set via config set command",
 		},
 		{
 			name:        "set empty config dir",
 			args:        []string{"CHATGPT_CLI_CONFIG_DIR", ""},
 			wantErr:     true,
-			errContains: "config directory cannot be empty",
+			errContains: "cannot be set via config set command",
 		},
 	}
 
