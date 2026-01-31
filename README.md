@@ -1,3 +1,8 @@
+[![CI](https://github.com/umbertocicciaa/chatgpt-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/umbertocicciaa/chatgpt-cli/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/umbertocicciaa/chatgpt-cli/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/umbertocicciaa/chatgpt-cli/actions/workflows/github-code-scanning/codeql)
+[![Dependency Graph](https://github.com/umbertocicciaa/chatgpt-cli/actions/workflows/dependabot/update-graph/badge.svg)](https://github.com/umbertocicciaa/chatgpt-cli/actions/workflows/dependabot/update-graph)
+[![Release](https://github.com/umbertocicciaa/chatgpt-cli/actions/workflows/release.yml/badge.svg)](https://github.com/umbertocicciaa/chatgpt-cli/actions/workflows/release.yml)
+
 # ChatGPT CLI
 
 A modern, extensible command-line interface for ChatGPT with subcommand support, configuration management, and comprehensive logging.
