@@ -119,8 +119,8 @@ This project uses Go's standard library exclusively, minimizing external depende
 
 Users should:
 - Keep Go updated to the latest stable version
-- Build from source or verify checksums of binary releases
-- Review the source code before building (it's intentionally small and readable)
+- Install using `go install` for automatic dependency management
+- Review the source code before installing (it's intentionally small and readable)
 
 ### Multi-User Environments
 
