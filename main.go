@@ -409,14 +409,10 @@ func configListCommand(config *Config, args []string) error {
 	fmt.Println("Current Configuration:")
 	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
-	// Show API key masked
+	// Show API key redacted; never print the actual key
 	apiKey := config.APIKey
 	if apiKey != "" {
-		if len(apiKey) > 8 {
-			apiKey = apiKey[:4] + "..." + apiKey[len(apiKey)-4:]
-		} else {
-			apiKey = "***"
-		}
+		apiKey = "*** (set)"
 	} else {
 		apiKey = "(not set)"
 	}
