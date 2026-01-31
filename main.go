@@ -405,21 +405,22 @@ func configCommand(config *Config, args []string) error {
 }
 
 // configListCommand lists all configuration values
+func maskAPIKey(apiKey string) string {
+	if apiKey != "" {
+		if len(apiKey) > 8 {
+			return apiKey[:4] + "..." + apiKey[len(apiKey)-4:]
+		}
+		return "***"
+	}
+	return "(not set)"
+}
+
 func configListCommand(config *Config, args []string) error {
 	fmt.Println("Current Configuration:")
 	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
 	// Show API key masked
-	apiKey := config.APIKey
-	if apiKey != "" {
-		if len(apiKey) > 8 {
-			apiKey = apiKey[:4] + "..." + apiKey[len(apiKey)-4:]
-		} else {
-			apiKey = "***"
-		}
-	} else {
-		apiKey = "(not set)"
-	}
+	apiKey := maskAPIKey(config.APIKey)
 
 	fmt.Printf("%-25s %s\n", "OPENAI_API_KEY:", apiKey)
 	fmt.Printf("%-25s %s\n", "OPENAI_API_URL:", config.APIURL)
@@ -442,16 +443,7 @@ func configGetCommand(config *Config, args []string) error {
 
 	switch key {
 	case "OPENAI_API_KEY":
-		apiKey := config.APIKey
-		if apiKey != "" {
-			if len(apiKey) > 8 {
-				apiKey = apiKey[:4] + "..." + apiKey[len(apiKey)-4:]
-			} else {
-				apiKey = "***"
-			}
-		} else {
-			apiKey = "(not set)"
-		}
+		apiKey := maskAPIKey(config.APIKey)
 		fmt.Println(apiKey)
 	case "OPENAI_API_URL":
 		fmt.Println(config.APIURL)
