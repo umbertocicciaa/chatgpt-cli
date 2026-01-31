@@ -356,23 +356,6 @@ chatgpt-cli config set OPENAI_TIMEOUT 120s
 
 If you encounter rate limit errors, wait a few moments before trying again. Check your usage at <https://platform.openai.com/account/usage>
 
-## 📝 Changelog
-
-### .0 (2024)
-
-- **Breaking Change**: Now requires subcommands (e.g., `prompt`, `logs`)
-- Added configuration management commands
-- Added comprehensive logging system
-- Added runtime configuration via `config set`
-- All settings now configurable via environment variables
-- Improved error messages and validation
-- Full test coverage for all features
-- Extensible command architecture
-
-### v1.0.0 (2024)
-
-- Initial release with basic functionality
-
 ## 🤝 Contributing
 
 Contributions are welcome! Please:
