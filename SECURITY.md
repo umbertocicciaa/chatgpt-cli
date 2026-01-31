@@ -21,12 +21,11 @@ We take security vulnerabilities seriously. If you discover a security issue, pl
 
 ### How to Report
 
-**Please DO NOT create public GitHub issues for security vulnerabilities.**
+You can report security vulnerabilities through:
 
-Instead, report security vulnerabilities by:
-
-1. **Email**: Send a detailed report to the repository owner at the email address listed in the [GitHub profile](https://github.com/umbertocicciaa)
-2. **Security Advisory**: Use GitHub's [Security Advisory feature](https://github.com/umbertocicciaa/chatgpt-cli/security/advisories/new) (recommended)
+1. **GitHub Issues**: Create an issue describing the vulnerability (recommended for transparency)
+2. **Security Advisory**: Use GitHub's [Security Advisory feature](https://github.com/umbertocicciaa/chatgpt-cli/security/advisories/new) for private disclosure
+3. **Email**: Send a detailed report to the repository owner at the email address listed in the [GitHub profile](https://github.com/umbertocicciaa)
 
 ### What to Include
 
@@ -80,7 +79,9 @@ If the vulnerability is declined:
 
 ### Configuration File Security
 
-The application stores configuration in `~/.chatgpt-cli/`. This directory may contain sensitive information:
+The application stores configuration in `~/.chatgpt-cli/`. This directory may contain sensitive information.
+
+After installing via `go install`, ensure proper permissions on your config files:
 
 ```bash
 # Ensure proper permissions on config directory
@@ -119,8 +120,8 @@ This project uses Go's standard library exclusively, minimizing external depende
 
 Users should:
 - Keep Go updated to the latest stable version
-- Install using `go install` for automatic dependency management
-- Review the source code before installing (it's intentionally small and readable)
+- Build from source or verify checksums of binary releases
+- Review the source code before building (it's intentionally small and readable)
 
 ### Multi-User Environments
 
