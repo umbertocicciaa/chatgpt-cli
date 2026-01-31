@@ -438,7 +438,12 @@ func configGetCommand(config *Config, args []string) error {
 
 	switch key {
 	case "OPENAI_API_KEY":
-		fmt.Println(config.APIKey)
+		// Redact API key; never print the actual key
+		if config.APIKey != "" {
+			fmt.Println("*** (set)")
+		} else {
+			fmt.Println("(not set)")
+		}
 	case "OPENAI_API_URL":
 		fmt.Println(config.APIURL)
 	case "OPENAI_MODEL":
@@ -513,7 +518,12 @@ func configSetCommand(config *Config, args []string) error {
 		return fmt.Errorf("failed to save configuration: %w", err)
 	}
 
-	fmt.Printf("Set %s=%s\n", key, value)
+	// Redact API key in output
+	displayValue := value
+	if key == "OPENAI_API_KEY" {
+		displayValue = "*** (set)"
+	}
+	fmt.Printf("Set %s=%s\n", key, displayValue)
 	fmt.Printf("Configuration saved to %s\n", filepath.Join(config.ConfigDir, "config"))
 	return nil
 }
