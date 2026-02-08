@@ -7,10 +7,16 @@ on:
     branches:
       - main
       - master
+    paths-ignore:
+      - 'docs/**'
+      - 'mkdocs.yml'
   pull_request:
     branches:
       - main
       - master
+    paths-ignore:
+      - 'docs/**'
+      - 'mkdocs.yml'
   workflow_dispatch:
 
 jobs:

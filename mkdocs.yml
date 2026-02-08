@@ -1,0 +1,27 @@
+site_name: ChatGPT CLI Documentation
+site_description: A modern, extensible command-line interface for ChatGPT
+repo_url: https://github.com/umbertocicciaa/chatgpt-cli
+repo_name: umbertocicciaa/chatgpt-cli
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Usage: usage.md
+  - Configuration: configuration.md
+  - Development: development.md
