@@ -4,28 +4,28 @@ A modern, extensible command-line interface for ChatGPT with subcommand support,
 
 ## Features
 
-- Interactive chat sessions with ChatGPT
-- Subcommand-based architecture
-- Configuration management
-- Comprehensive logging
+- Subcommand-based architecture (`prompt`, `logs`, `config`, `help`)
+- Configuration management via environment variables and config file
+- Comprehensive logging of prompts, responses, and errors
+- API key masking for security
 - Cross-platform support (Linux, macOS, Windows)
 
 ## Quick Start
 
 ```bash
-# Install
-go install github.com/umbertocicciaa/chatgpt-cli@latest
+# 1. Set your API key
+export OPENAI_API_KEY="sk-your-api-key-here"
 
-# Set your API key
-export OPENAI_API_KEY="your-api-key"
+# 2. Build
+go build -o chatgpt-cli main.go
 
-# Start chatting
-chatgpt-cli chat "Hello, how are you?"
+# 3. Send a prompt
+chatgpt-cli prompt "Explain Go interfaces"
 ```
 
 ## Documentation
 
 - [Installation](installation.md) - How to install ChatGPT CLI
-- [Usage](usage.md) - How to use ChatGPT CLI
-- [Configuration](configuration.md) - Configuration options
+- [Usage](usage.md) - All commands, syntax, and examples
+- [Configuration](configuration.md) - Configuration variables, config file, and precedence
 - [Development](development.md) - Contributing and development guide
